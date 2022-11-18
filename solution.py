@@ -99,7 +99,7 @@ def get_route(hostname):
                 howLongInSelect = (time.time() - startedSelect)
                 if whatReady[0] == []: # Timeout
                     #Fill in start
-                    df = df.append({'Hop Count': str(ttl), 'Try': str(TRIES), 'IP': 'Timeout', 'Hostname': 'Timeout', 'Response Code': 'Timeout' }, ignore_index=True)
+                    df = df.append({'Hop Count': str(ttl), 'Try': str(TRIES), 'IP': 'timeout', 'Hostname': 'timeout', 'Response Code': 'timeout' }, ignore_index=True)
                     #append response to your dataframe including hop #, try #, and "Timeout" responses as required by the acceptance criteria
                     #print (df)
                     #Fill in end
@@ -109,7 +109,7 @@ def get_route(hostname):
                 dispHostName = gethostbyaddr(addr[0])
                 if timeLeft <= 0:
                     #Fill in start
-                    df = df.append({'Hop Count': str(ttl), 'Try': str(TRIES), 'IP': 'Timeout', 'Hostname': 'Timeout', 'Response Code': 'Timeout' }, ignore_index=True)
+                    df = df.append({'Hop Count': str(ttl), 'Try': str(TRIES), 'IP': 'timeout', 'Hostname': 'timeout', 'Response Code': 'timeout' }, ignore_index=True)
                     #append response to your dataframe including hop #, try #, and "Timeout" responses as required by the acceptance criteria
                     #print (df)
                     #Fill in end
