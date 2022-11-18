@@ -80,7 +80,6 @@ def get_route(hostname):
     for ttl in range(1,MAX_HOPS):
         for tries in range(TRIES):
             destAddr = gethostbyname(hostname)
-
             #Fill in start
             # Make a raw socket named mySocket
             icmp = getprotobyname("icmp")
@@ -97,7 +96,7 @@ def get_route(hostname):
                 whatReady = select.select([mySocket], [], [], timeLeft)
                 howLongInSelect = (time.time() - startedSelect)
                 df = pd.DataFrame(columns=['Hop Count', 'Try', 'IP', 'Hostname', 'Response Code'])
-                hopCount = 1
+                hopCount = ttl
                 tryCount = 1
                 if whatReady[0] == []: # Timeout
                     #Fill in start
@@ -109,6 +108,7 @@ def get_route(hostname):
                 recvPacket, addr = mySocket.recvfrom(1024)
                 timeReceived = time.time()
                 timeLeft = timeLeft - howLongInSelect
+
                 if timeLeft <= 0:
                     #Fill in start
                     df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': 'Timeout', 'Hostname': 'Timeout', 'Response Code': 'Timeout' }, ignore_index=True)
@@ -131,7 +131,7 @@ def get_route(hostname):
                     #Fill in end
                 except herror:   #if the host does not provide a hostname
                     #Fill in start
-                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr), 'Response Code': str(types)}, ignore_index=True)
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr[0]), 'Response Code': str(types)}, ignore_index=True)
                     hopCount = hopCount + 1
                     #Fill in end
 
@@ -140,7 +140,7 @@ def get_route(hostname):
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
                     #You should update your dataframe with the required column field responses here
-                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr), 'Response Code': str(types)}, ignore_index=True)
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr[0]), 'Response Code': str(types)}, ignore_index=True)
                     hopCount = hopCount + 1
                     #Fill in end
                 elif types == 3:
@@ -148,7 +148,7 @@ def get_route(hostname):
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
                     #You should update your dataframe with the required column field responses here
-                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr), 'Response Code': str(types)}, ignore_index=True)
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr[0]), 'Response Code': str(types)}, ignore_index=True)
                     hopCount = hopCount + 1
                     #Fill in end
                 elif types == 0:
@@ -156,13 +156,13 @@ def get_route(hostname):
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
                     #You should update your dataframe with the required column field responses here
-                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr), 'Response Code': str(types)}, ignore_index=True)
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr[0]), 'Response Code': str(types)}, ignore_index=True)
                     hopCount = hopCount + 1
                     #Fill in end
                 else:
                     #Fill in start
                     #If there is an exception/error to your if statements, you should append that to your df here
-                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr), 'Response Code': str(types)}, ignore_index=True)
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(addr[0]), 'Response Code': str(types)}, ignore_index=True)
                     hopCount = hopCount + 1
                     #Fill in end
                 break
