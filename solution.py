@@ -49,9 +49,10 @@ def build_packet():
 
     # Don’t send the packet yet , just return the final packet in this function.
     myChecksum = 0
+    myID = os.getpid() & 0xFFFF
     # Make a dummy header with a 0 checksum
     # struct -- Interpret strings as packed binary data
-    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, myID, 1)
     data = struct.pack("d", time.time())
     # Calculate the checksum on the data and the dummy header.
     myChecksum = checksum(header + data)
@@ -64,7 +65,7 @@ def build_packet():
     else:
         myChecksum = htons(myChecksum)
 
-    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, myID, 1)
     #Fill in end
 
     # So the function ending should look like this
@@ -95,8 +96,13 @@ def get_route(hostname):
                 startedSelect = time.time()
                 whatReady = select.select([mySocket], [], [], timeLeft)
                 howLongInSelect = (time.time() - startedSelect)
+                df = pd.DataFrame(columns=['Hop Count', 'Try', 'IP', 'Hostname', 'Response Code'])
+                hopCount = 1
+                tryCount = 1
                 if whatReady[0] == []: # Timeout
                     #Fill in start
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': 'Timeout', 'Hostname': 'Timeout', 'Response Code': 'Timeout' }, ignore_index=True)
+                    hopCount = hopCount + 1
                     #append response to your dataframe including hop #, try #, and "Timeout" responses as required by the acceptance criteria
                     #print (df)
                     #Fill in end
@@ -105,6 +111,8 @@ def get_route(hostname):
                 timeLeft = timeLeft - howLongInSelect
                 if timeLeft <= 0:
                     #Fill in start
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': 'Timeout', 'Hostname': 'Timeout', 'Response Code': 'Timeout' }, ignore_index=True)
+                    hopCount = hopCount + 1
                     #append response to your dataframe including hop #, try #, and "Timeout" responses as required by the acceptance criteria
                     #print (df)
                     #Fill in end
@@ -118,33 +126,44 @@ def get_route(hostname):
                 #Fill in end
                 try: #try to fetch the hostname
                     #Fill in start
+                    icmpHeader = recvPacket[20:28]
+                    types, code, checksum, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
                     #Fill in end
                 except herror:   #if the host does not provide a hostname
                     #Fill in start
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(hostname), 'Response Code': str(types)}, ignore_index=True)
+                    hopCount = hopCount + 1
                     #Fill in end
 
                 if types == 11:
                     bytes = struct.calcsize("d")
-                    timeSent = struct.unpack("d", recvPacket[28:28 +
-                    bytes])[0]
+                    timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
                     #You should update your dataframe with the required column field responses here
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(hostname), 'Response Code': str(types)}, ignore_index=True)
+                    hopCount = hopCount + 1
                     #Fill in end
                 elif types == 3:
                     bytes = struct.calcsize("d")
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
                     #You should update your dataframe with the required column field responses here
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(hostname), 'Response Code': str(types)}, ignore_index=True)
+                    hopCount = hopCount + 1
                     #Fill in end
                 elif types == 0:
                     bytes = struct.calcsize("d")
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
                     #You should update your dataframe with the required column field responses here
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(hostname), 'Response Code': str(types)}, ignore_index=True)
+                    hopCount = hopCount + 1
                     #Fill in end
                 else:
                     #Fill in start
                     #If there is an exception/error to your if statements, you should append that to your df here
+                    df = df.append({'Hop Count': str(hopCount), 'Try': str(tryCount), 'IP': str(destAddr), 'Hostname': str(hostname), 'Response Code': str(types)}, ignore_index=True)
+                    hopCount = hopCount + 1
                     #Fill in end
                 break
     return df
