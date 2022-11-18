@@ -75,6 +75,7 @@ def build_packet():
     return packet
 
 def get_route(hostname):
+    timeLeft = TIMEOUT
     df = pd.DataFrame(columns=['Hop Count', 'Try', 'IP', 'Hostname', 'Response Code'])
 
     for ttl in range(1,MAX_HOPS):
